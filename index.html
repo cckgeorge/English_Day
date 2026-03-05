@@ -39,7 +39,7 @@
 
         <div id="page-script" class="page">
             <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-orange); font-size:1.4rem; display: flex; justify-content: space-between;">
-                <span>🎭 表演劇本 (雲端同步):</span>
+                <span>🎭 表演劇本 (個人雲端同步):</span>
                 <span id="sync-status">● 讀取中...</span>
             </div>
             <div class="script-area" id="script-content">劇本載入中...</div>
@@ -53,8 +53,8 @@
     </div>
 
     <script>
-        // 修正重點：使用 /pub 格式來解決 CORS 權限問題
-        const SHEET_ID = '1tiDLiTQA2lof2awzdHBUa_UoYBX9H-UZEyqswcxb7Yk';
+        // 已更新為您的個人帳號試算表 ID
+        const SHEET_ID = '1T6Yqf7_UxiVwBe9g8DQhaYMIAN6z3IHWJTvTom5S924';
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
 
         const weeklyDB = {
@@ -69,7 +69,7 @@
             12: ["—", "—", "—", "全中運停課"],
             13: ["Follow me.\n跟著我。", "Take your time.\n慢慢來。", "You blew it!\n你把事情搞砸了！", "What’s your plan for the weekend?\n你週末有什麼計畫？"],
             14: ["One more time.\n再一次。", "See you next week.\n下星期見。", "What a deal!\n好便宜！", "Where is the restroom?\n洗手間在哪裡？"],
-            15: ["It's your turn.\n輪到你了。", "Are you sure?\n你確定嗎？", "I have no idea.\n一門頭緒都沒有。", "Let's call it a day.\n今天就到此為止吧。"],
+            15: ["It's your turn.\n輪到你了。", "Are you sure?\n你確定嗎？", "I have no idea.\n我一點頭緒都沒有。", "Let's call it a day.\n今天就到此為止吧。"],
             16: ["I'm hungry.\n我餓了。", "What's for lunch?\n午餐吃什麼？", "I'm looking forward to it.\n我很期待。", "Never mind.\n沒關係 / 別介意。"],
             17: ["Let's count.\n讓我們來數一數。", "Be careful.\n小心。", "What happened?\n發生什麼事了？", "Keep it up.\n繼續努力。"],
             18: ["Great job!\n做得好！", "Excuse me.\n請問一下 / 不好意思。", "Don't give up.\n不要放棄。", "Believe in yourself.\n相信你自己。"],
@@ -91,9 +91,9 @@
         async function fetchScriptFromCloud() {
             const statusTag = document.getElementById('sync-status');
             try {
-                // 加入快取消除機制
+                // 強制加上 nocache 防止舊資料快取
                 const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
-                if (!res.ok) throw new Error("Fetch failed");
+                if (!res.ok) throw new Error();
                 const text = await res.text();
                 
                 const rows = [];
@@ -111,15 +111,16 @@
                     } else { currField += c; }
                 }
 
+                // 尋找對應週次 (第一欄)
                 const target = rows.find(r => r[0] && r[0].trim() == String(currentWeek));
                 if (target) {
                     let found = "";
-                    // 從後往前搜尋第一個長內容當劇本
+                    // 從整列的最後一個儲存格往回找，找到長度超過 5 的當作劇本
                     for(let i = target.length - 1; i >= 1; i--) {
                         let content = target[i] ? target[i].trim() : "";
                         if(content.length > 5) { found = content; break; }
                     }
-                    cloudScript = found || "找到該週，但劇本欄位是空的。";
+                    cloudScript = found || "劇本欄位目前是空的。";
                     statusTag.innerText = "● 連線成功";
                     statusTag.style.color = "green";
                 } else {
@@ -128,8 +129,7 @@
                     statusTag.style.color = "orange";
                 }
             } catch (e) {
-                console.error("CORS or Network Error:", e);
-                cloudScript = "讀取失敗。請確認試算表已『發佈到網路』並選擇『CSV』格式。";
+                cloudScript = "連線失敗。請確認試算表已『發佈到網路』並選擇『CSV』。";
                 statusTag.innerText = "● 連線失敗";
                 statusTag.style.color = "red";
             }
