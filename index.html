@@ -2,102 +2,562 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>嘉義太保國小 - 英語日宣導系統</title>
+    <title>嘉義太保國小 - 英語日暨幸運抽籤系統 (終極整合版)</title>
     <style>
-        :root { --bg-color: #fdfdfd; --primary-color: #3d405b; --accent-yellow: #f2cc8f; --accent-green: #81b29a; --accent-orange: #e07a5f; }
-        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .container { width: 95%; max-width: 1350px; height: 88vh; background: white; border-radius: 30px; border: 8px solid #9d8189; padding: 30px; display: flex; flex-direction: column; position: relative; box-sizing: border-box; box-shadow: 15px 15px 0px rgba(0,0,0,0.05); }
-        .page { display: none; height: 100%; flex-direction: column; justify-content: center; }
-        .active { display: flex; }
-        .overview-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; }
-        .row-grade { background: var(--accent-yellow); width: 18%; text-align: center; font-size: 2rem; font-weight: bold; border-radius: 20px 0 0 20px; padding: 15px; }
-        .row-en { background: #fff; border: 4px solid var(--accent-yellow); border-left: none; width: 82%; font-size: 1.8rem; font-weight: bold; padding-left: 25px; border-radius: 0 20px 20px 0; line-height: 1.4; white-space: pre-wrap; }
-        .detail-grade { background: var(--accent-yellow); display: inline-block; padding: 10px 80px; border-radius: 60px; font-size: 3.5rem; font-weight: bold; margin: 0 auto 20px; text-align: center; }
-        .detail-en { font-size: 4.5rem; font-weight: 900; text-align: center; line-height: 1.2; margin-bottom: 10px; padding: 0 20px; color: #111; white-space: pre-wrap; }
-        .script-area { background: #fff; border: 5px dashed var(--accent-green); border-radius: 20px; padding: 30px; overflow-y: auto; height: 55vh; font-size: 2.3rem; line-height: 1.6; white-space: pre-wrap; text-align: left; }
-        .highlight { color: #e63946; font-weight: 900; text-decoration: underline; background: rgba(230,57,70,0.1); }
-        .controls { position: absolute; bottom: 15px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 15px; }
-        select { font-size: 1.5rem; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--primary-color); }
-        button.nav-btn { padding: 12px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 12px; border: none; background: var(--primary-color); color: white; }
+        :root { 
+            --bg-color: #fdfdfd; --primary-color: #3d405b; --accent-yellow: #f2cc8f; 
+            --accent-green: #81b29a; --accent-orange: #e07a5f; --mario-red: #e4000f; --mario-blue: #0058e0;
+            --font-main: "Segoe UI", "Microsoft JhengHei", sans-serif;
+        }
+        body { margin: 0; font-family: var(--font-main); background: linear-gradient(to bottom, #a0d8ef 0%, #fdfdfd 100%); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 0; }
+        
+        .container { width: 95%; max-width: 1200px; background: white; border-radius: 30px; border: 8px solid #9d8189; padding: 30px; margin-bottom: 30px; box-sizing: border-box; box-shadow: 15px 15px 0px rgba(0,0,0,0.05); }
+        
+        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px solid #eee; padding-bottom: 15px; }
+        
+        /* 表格樣式 */
+        .overview-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-bottom: 20px; }
+        .row-grade { background: var(--accent-yellow); width: 15%; text-align: center; font-size: 2.2rem; font-weight: 900; border-radius: 15px 0 0 15px; padding: 15px; color: #333; }
+        .row-en { background: #fff; border: 4px solid var(--accent-yellow); border-left: none; width: 70%; font-size: 2rem; font-weight: 800; padding-left: 20px; line-height: 1.3; white-space: pre-wrap; color: #111; }
+        .row-speak { background: #fff; border: 4px solid var(--accent-yellow); border-left: none; width: 15%; border-radius: 0 15px 15px 0; text-align: center; }
+        
+        /* 劇本樣式 */
+        .script-section { margin-top: 10px; border-top: 2px solid #eee; padding-top: 20px; }
+        .script-title { font-weight: bold; margin-bottom: 15px; color: var(--accent-orange); font-size: 1.8rem; display: flex; justify-content: space-between; align-items: center; }
+        .script-area { background: #fdfdfd; border: 5px dashed var(--accent-green); border-radius: 20px; padding: 35px; font-size: 2rem; line-height: 1.8; white-space: pre-wrap; color: #222; font-weight: 500; }
+        .highlight { color: #e63946; font-weight: 900; text-decoration: underline; background: rgba(230,57,70,0.1); padding: 0 5px; border-radius: 5px; }
+        
+        /* 抽籤器樣式 */
+        .lottery-section { margin-top: 50px; background: rgba(255, 255, 255, 0.95); border-radius: 40px; padding: 40px; border: 8px solid var(--mario-blue); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .settings-bar { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; font-size: 1.5rem; background: #f1f8e9; padding: 20px; border-radius: 20px; }
+        
+        /* 免死金牌名單快選區 */
+        .quick-exclude-box { background: #f9f9f9; border-radius: 20px; padding: 20px; margin-bottom: 25px; border: 2px solid #eee; }
+        .chip-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+        .student-chip { padding: 8px 18px; border-radius: 20px; border: 2px solid var(--mario-blue); background: white; color: var(--mario-blue); font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+        .student-chip.is-drawn { background: #eee; border-color: #ccc; color: #999; }
+        
+        .display-card { background-color: #fff9c4; border: 8px solid #ff5722; border-radius: 40px; padding: 50px 20px; min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        #winner-name { font-size: 8.5rem; font-weight: 900; color: var(--mario-red); text-shadow: 4px 4px 0px white, 8px 8px 0px rgba(0,0,0,0.1); margin: 10px 0; }
+        .shuffling-text { color: var(--mario-blue) !important; transform: scale(0.92); }
+        
+        .sentence-box { width: 95%; background: white; border: 5px solid #ffb74d; border-radius: 25px; padding: 25px; margin-top: 25px; display: none; text-align: left; }
+        .sentence-en { font-size: 2.6rem; color: var(--mario-blue); font-weight: 900; line-height: 1.2; margin-bottom: 10px; }
+        .sentence-ch { font-size: 2rem; color: #444; font-weight: bold; }
+        
+        .draw-btn { padding: 20px 80px; font-size: 2.2rem; background: #ff5722; color: white; border: none; border-radius: 100px; cursor: pointer; font-weight: bold; box-shadow: 0 12px 0px #b71c1c; transition: 0.1s; }
+        .draw-btn:active { transform: translateY(4px); box-shadow: 0 6px 0px #b71c1c; }
+        .sync-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; background-color: #bbb; }
+        .sync-active { background-color: #28a745; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .celebrate { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1.1); opacity: 1; } }
+        .speak-btn { font-size: 1.4rem; cursor: pointer; background: var(--accent-green); color: white; border: none; border-radius: 12px; padding: 10px 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-container">
-        <div id="page-overview" class="page active">
-            <h1 style="text-align: center; font-size: 2.5rem; margin: 0;">每週英語一句</h1>
-            <table class="overview-table" id="table-content"></table>
-        </div>
-
-        <div id="page-detail" class="page">
-            <div class="detail-grade" id="det-g"></div>
-            <div class="detail-en" id="det-en"></div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button style="padding:15px 40px; font-size:1.8rem; cursor:pointer; background:var(--accent-green); color:white; border:none; border-radius:50px;" onclick="event.stopPropagation(); speak()">🔊 播放發音</button>
+    <div class="container">
+        <div class="header-box">
+            <h1 style="margin: 0; font-size: 2.5rem; color: var(--primary-color);">每週英語一句</h1>
+            <div>
+                <select id="week-select" onchange="changeWeek()" style="font-size: 1.5rem; padding: 10px; border-radius: 15px; border: 3px solid var(--primary-color); cursor:pointer;"></select>
             </div>
         </div>
+        <table class="overview-table" id="table-content"></table>
 
-        <div id="page-script" class="page">
-            <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-orange); font-size:1.4rem; display: flex; justify-content: space-between;">
-                <span>🎭 表演劇本 (雲端同步成功):</span>
-                <span id="sync-status">● 讀取中...</span>
+        <div class="script-section">
+            <div class="script-title">
+                <span>🎭 本週表演劇本：</span>
+                <span id="sync-status" style="font-size: 1.2rem; font-weight: bold; color: #666;">
+                    <span class="sync-dot" id="status-dot"></span><span id="status-text">連線中...</span>
+                </span>
             </div>
-            <div class="script-area" id="script-content">劇本載入中...</div>
+            <div class="script-area" id="script-content">正在讀取雲端劇本...</div>
         </div>
 
-        <div class="controls" id="controls-bar">
-            <button class="nav-btn" onclick="prev()">◀ 上一頁</button>
-            <select id="week-select" onchange="changeWeek()"></select>
-            <button class="nav-btn" onclick="next()">下一頁 ▶</button>
+        <div class="lottery-section">
+            <h1 style="color: var(--mario-blue); font-size: 3rem; margin-top: 0;">🎯 幸運抽籤</h1>
+            <div class="settings-bar">
+                <div>年級：<select id="gradeSelect" onchange="updateClassOptions()" style="font-size: 1.5rem;"></select></div>
+                <div>班級：<select id="classSelect" onchange="updateCounter()" style="font-size: 1.5rem;"></select></div>
+            </div>
+
+            <div class="quick-exclude-box">
+                <div style="font-weight: bold; color: #666; font-size: 1.2rem;">🛡️ 點擊名字發放「免死金牌」(本週不重複抽選)：</div>
+                <div id="student-list-chips" class="chip-container"></div>
+            </div>
+            
+            <div class="display-card">
+                <div id="winner-info" style="font-size: 2rem; font-weight: bold; color: #5d4037; background: white; padding: 10px 30px; border-radius: 50px;">Ready?</div>
+                <div id="winner-name">？</div>
+                
+                <div class="sentence-box" id="sentence-box">
+                    <span style="color: #ff5722; font-weight: 900; font-size: 1.4rem;">📖 請讀出當週句子：</span>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                    <span class="sentence-en" id="sentence-en"></span>
+                    <span class="sentence-ch" id="sentence-ch"></span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button class="draw-btn" id="btnDraw">開始抽籤！</button>
+                <button onclick="resetDrawnHistory()" style="margin-top:20px; display:block; margin-left:auto; margin-right:auto; padding: 8px 15px; color:#999; border:none; background:none; cursor:pointer; text-decoration:underline;">重置所有抽籤紀錄</button>
+            </div>
+            <div id="counter-info" style="margin-top:15px; font-weight:bold; color:#666;">選定名單共 -- 人，已抽 -- 人，剩餘 -- 人</div>
         </div>
     </div>
 
     <script>
-        // 使用您提供的公開下載連結
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQzyQyNU7yFhOkWzlCWj_SlltAD64isYM3fmsq4D3PaPTymq2Dgu7iJ6rl8Lvy8Z8oBX6rhdrjEV8Mk/pub?output=csv`;
 
         const weeklyDB = {
-            4: ["Good job!\n做得好！", "Welcome back to school.\n歡迎回到學校。", "Take your time.\n慢慢來，不用急。", "What did you hear?\n你聽到什麼了？"],
+            4: ["Good job.\n做得好！", "Welcome back to school.\n歡迎回到學校。", "Take your time.\n慢慢來，不用急。", "What did you hear?\n你聽到什麼了？"],
             5: ["Hands up, please.\n請舉手。", "Happy to see you again.\n很開心又見面了。", "You can say that again.\n你說得沒錯。", "Which one do you like?\n你喜歡哪一個？"],
             6: ["Hands down.\n手放下。", "Time for class.\n上課囉！", "May I help you?\n我可以幫你嗎？", "Who can answer me?\n誰能回答？"],
             7: ["Eyes on me.\n眼睛看我。", "Here we go.\n我們開始吧！", "That sounds fun!\n聽起來很有趣！", "Take your time.\n慢慢來，不用急。"],
             8: ["Take a seat.\n請坐好。", "Here you are.\n這個給你。", "How was your weekend?\n你的週末過得如何？", "Let's go out for a walk.\n讓我們出去走走。"],
             9: ["Try again.\n再試一次。", "Take it easy.\n放輕鬆。", "Please say it again.\n請再說一次。", "Please keep the table clean.\n請保持桌面乾淨。"],
-            10: ["Very good!\n非常好！", "Good luck.\n祝好運。", "I'm proud of you!\n我為你感到驕傲！", "You are very clever!\n你真聰明！"],
+            10: ["Very good!\n非常好！", "Good luck.\n祝好運。", "I’m proud of you!\n我為你感到驕傲！", "You are very clever!\n你真聰明！"],
             11: ["Are you ready?\n準備好了嗎？", "Hold on a second.\n等一下。", "Keep up the good work!\n繼續保持好表現！", "May I use your pen?\n我可以借用一下你的筆嗎？"],
             12: ["—", "—", "—", "全中運停課"],
             13: ["Follow me.\n跟著我。", "Take your time.\n慢慢來。", "You blew it!\n你把事情搞砸了！", "What’s your plan for the weekend?\n你週末有什麼計畫？"],
             14: ["One more time.\n再一次。", "See you next week.\n下星期見。", "What a deal!\n好便宜！", "Where is the restroom?\n洗手間在哪裡？"],
-            15: ["It's your turn.\n輪到你了。", "Are you sure?\n你確定嗎？", "I have no idea.\n我一點頭緒都沒有。", "Let's call it a day.\n今天就到此為止吧。"],
-            16: ["I'm hungry.\n我餓了。", "What's for lunch?\n午餐吃什麼？", "I'm looking forward to it.\n我很期待。", "Never mind.\n沒關係 / 別介意。"],
-            17: ["Let's count.\n讓我們來數一數。", "Be careful.\n小心。", "What happened?\n發生什麼事了？", "Keep it up.\n繼續努力。"],
-            18: ["Great job!\n做得好！", "Excuse me.\n請問一下 / 不好意思。", "Don't give up.\n不要放棄。", "Believe in yourself.\n相信你自己。"],
-            19: ["Happy Summer!\n暑假快樂！", "See you later.\n待會見。", "Have a nice trip.\n旅途愉快。", "Happy Graduation!\n畢業快樂！"],
-            20: ["See you next semester.\n下學期見。", "See you next semester.", "See you next semester.", "See you next semester."]
+            15: ["Let’s try.\n我們試試看。", "Have fun.\n玩得愉快！", "Take good care of yourself.\n好好照顧自己。", "I feel better now.\n我感覺好多了。"],
+            16: ["Good listening!\n聽得很好！", "Need some help?\n需要幫忙嗎？", "Today is my day.\n我今天運氣真好。", "It doesn't matter.\n沒關係的。"],
+            17: ["Do your best.\n盡力而為。", "Could you do me a favor?\n可以幫我一個忙嗎？", "I need to take a day off.\n我需要請一天假。", "I need some rest.\n我需要休息一下。"],
+            18: ["Thank you.\n謝謝你。", "I’m almost done.\n我快好了！", "I’m on your side.\n我支持你。", "It's up to you.\n由你決定。"],
+            19: ["I can do it.\n我做得到！", "Good for you.\n做得好！", "Practice makes perfect.\n熟能生巧。", "It’s a piece of cake.\n這太容易了。"],
+            20: ["Have a nice day!\n祝你有美好的一天！", "Are you OK?\n還好嗎？", "Go for it!\n加油！", "Give me a break!\n饒了我吧！"]
         };
 
-        let currentWeek = 5; 
-        let step = -1;
-        let cloudScript = "讀取中...";
+        const weekDates = {4:"02/27", 5:"03/06", 6:"03/13", 7:"03/20", 8:"03/27", 9:"04/03", 10:"04/10", 11:"04/17", 12:"04/24", 13:"05/01", 14:"05/08", 15:"05/15", 16:"05/22", 17:"05/29", 18:"06/05", 19:"06/12", 20:"06/19"};
 
-        const select = document.getElementById('week-select');
-        for(let w=4; w<=20; w++) {
-            let opt = document.createElement('option'); opt.value = w; opt.text = `第 ${w} 週`;
-            if(w==currentWeek) opt.selected = true;
-            select.appendChild(opt);
+        const rawRoster = `一年忠班,1,陳泰宇
+一年忠班,2,吳侑宸
+一年忠班,3,莊天豪
+一年忠班,4,官郡豐
+一年忠班,5,林哲宇
+一年忠班,6,蔡忻睿
+一年忠班,7,徐子洋
+一年忠班,8,吳昆霖
+一年忠班,9,黃士峰
+一年忠班,10,何葦翔
+一年忠班,11,邱芷玲
+一年忠班,12,蔡芮億
+一年忠班,13,陳乙函
+一年忠班,14,楊晨星
+一年忠班,15,陳妙芯
+一年忠班,16,呂秀勻
+一年忠班,17,呂佳璇
+一年忠班,18,傅榆涵
+一年忠班,19,錢品辰
+一年忠班,20,周穎暄
+一年忠班,21,郭栗禾
+一年忠班,22,蘇柏欣
+一年忠班,23,劉泳嫻
+一年孝班,1,李柏叡
+一年孝班,2,楊才毅
+一年孝班,3,黃麒安
+一年孝班,4,王哲愷
+一年孝班,5,阮楷翔
+一年孝班,6,宋鎮宇
+一年孝班,7,黃陳威志
+一年孝班,8,蔡秉軒
+一年孝班,9,林啟洺
+一年孝班,10,官正叡
+一年孝班,11,呂彥霆
+一年孝班,12,賴映榳
+一年孝班,13,洪微晴
+一年孝班,14,吳子璇
+一年孝班,15,蔡侑暿
+一年孝班,16,王晴暄
+一年孝班,17,蔡聿婕
+一年孝班,18,官旻燁
+一年孝班,19,何霜季
+一年孝班,20,蔡沂妤
+一年孝班,21,謝椬蓒
+一年孝班,22,黃郁甯
+二年忠班,1,黃信佳
+二年忠班,2,吳丞閔
+二年忠班,3,呂紹愷
+二年忠班,4,張權宇
+二年忠班,5,陳泰燁
+二年忠班,6,吳文樂
+二年忠班,7,蔡睿恩
+二年忠班,8,賴裕聖
+二年忠班,9,蔣國呈
+二年忠班,10,蔡佑杰
+二年忠班,11,黃品鈞
+二年忠班,12,林子凌
+二年忠班,13,吳芮妘
+二年忠班,14,林宣岑
+二年忠班,15,陳昕悅
+二年忠班,16,林妍曦
+二年忠班,17,蔡艾庭
+二年忠班,18,謝心予
+二年忠班,19,呂蕎妤
+二年忠班,20,蔡依珊
+二年孝班,1,林家闓
+二年孝班,2,陳錠逵
+二年孝班,3,馬均凱
+二年孝班,4,洪鎮祐
+二年孝班,5,蔡忻恆
+二年孝班,6,曹品鈞
+二年孝班,7,陳星宇
+二年孝班,8,呂尚恩
+二年孝班,9,吳昱豪
+二年孝班,10,侯竑宇
+二年孝班,11,方思晴
+二年孝班,12,江之甯
+二年孝班,13,蔡侑汝
+二年孝班,14,蘇縈軒
+二年孝班,15,蔡宜蓁
+二年孝班,16,蔡語岑
+二年孝班,17,柯嘉晏
+二年孝班,18,林宣岑
+二年孝班,19,楊侑穎
+二年孝班,20,官筠庭
+二年仁班,1,侯偉杰
+二年仁班,2,蔡博安
+二年仁班,3,林轩圻
+二年仁班,4,王智韋
+二年仁班,5,郭洪頡
+二年仁班,6,蔡克擎
+二年仁班,7,官子祐
+二年仁班,8,王宏志
+二年仁班,9,雷子毅
+二年仁班,10,龔浚瑋
+二年仁班,11,蔡婕筠
+二年仁班,12,徐子甯
+二年仁班,13,官於甯
+二年仁班,14,黃巧瑜
+二年仁班,15,郭芯瑜
+二年仁班,16,呂立慈
+二年仁班,17,賴忻妮
+二年仁班,18,蔡佩妏
+二年仁班,19,黃斯筠
+三年忠班,1,呂彥澄
+三年忠班,2,蔡金河
+三年忠班,3,蔡沅佐
+三年忠班,4,劉宇昕
+三年忠班,5,侯佾承
+三年忠班,6,蔡承翰
+三年忠班,7,鐘柏崴
+三年忠班,8,賴邵邡
+三年忠班,9,侯鈞程
+三年忠班,10,林廣曜
+三年忠班,11,蔡少瑋
+三年忠班,12,林歆喬
+三年忠班,13,賴映儒
+三年忠班,14,陳語旋
+三年忠班,15,鄭琳營
+三年忠班,16,楊婕妤
+三年忠班,17,涂娠瑄
+三年忠班,18,施子瑜
+三年忠班,19,蘇盈甄
+三年孝班,1,蔡旻宇
+三年孝班,2,陳佑佑
+三年孝班,3,侯凱森
+三年孝班,4,廖冠赫
+三年孝班,5,呂承翰
+三年孝班,6,蔡濬叡
+三年孝班,7,楊諺霖
+三年孝班,8,黃麒宏
+三年孝班,9,官甫沅
+三年孝班,10,陳椲捷
+三年孝班,11,蔡秉綸
+三年孝班,12,官芃忻
+三年孝班,13,蔡諝倫
+三年孝班,14,徐以璐
+三年孝班,15,許挑戰
+三年孝班,16,官雨萱
+三年孝班,17,王雨婕
+三年仁班,1,郭信辰
+三年仁班,2,沈冠霖
+三年仁班,3,石翊辰
+三年仁班,4,黃子健
+三年仁班,5,呂柏樂
+三年仁開,6,黃彥碩
+三年仁班,7,傅椲恩
+三年仁班,8,吳承鋙
+三年仁班,9,吳承均
+三年仁班,10,張文欽
+三年仁班,11,石承運
+三年仁班,12,劉子寧
+三年仁班,13,黃一葦
+三年仁班,14,陳倚靖
+三年仁班,15,賴家糛
+三年仁班,16,呂妤晨
+三年仁班,17,侯喬馨
+三年仁班,18,林妍蓁
+三年仁班,19,許文菱
+四年忠班,1,蔡宇暢
+四年忠班,2,張允杰
+四年忠班,3,建築銘
+四年忠班,4,賴承翰
+四年忠班,5,梁允睿
+四年忠班,6,涂家銘
+四年忠班,7,柯汯琍
+四年忠班,8,蔡侑宸
+四年忠班,9,林恩丞
+四年忠班,10,馬翊愷
+四年忠班,11,張筑鈞
+四年忠班,12,黃子芳
+四年忠班,13,陳芓伃
+四年忠班,14,黃榆媃
+四年忠班,15,傅紫晴
+四年忠班,16,洪千涵
+四年忠班,17,黃苡蕎
+四年忠班,18,蔡容璇
+四年忠班,19,張紜瑄
+四年忠班,20,鄭恩佳
+四年忠班,21,蔡欣宸
+四年忠班,22,葉瑀琋
+四年孝班,1,呂宥義
+四年孝班,2,林羽翔
+四年孝班,3,馬偉珉
+四年孝班,4,張宏源
+四年孝班,5,蔡政叡
+四年孝班,6,李紘舟
+四年孝班,7,黃泰逸
+四年孝班,8,何柏諒
+四年孝班,9,鄭兆凱
+四年孝班,10,莊子賢
+四年孝班,11,雷依勍
+四年孝班,12,侯芝芸
+四年孝班,13,侯旨芮
+四年孝班,14,涂娠蒨
+四年孝班,15,許庭綺
+四年孝班,16,蔡幸芳
+四年孝班,17,黃佳柔
+四年孝班,18,戴妍昕
+四年孝班,19,羅子依
+四年孝班,20,蔡宜辰
+四年仁班,1,陳書稷
+四年仁班,2,陳啟峯
+四年仁班,3,劉耘典
+四年仁班,4,陳人華
+四年仁班,5,鄭亦恩
+四年仁班,6,許晨恩
+四年仁班,7,王博彥
+四年仁班,8,馬嘉佑
+四年仁班,9,黃忠陞
+四年仁班,10,吳祐錦
+四年仁班,11,王又加
+四年仁班,12,陳樂
+四年仁班,13,吳芸橙
+四年仁班,14,吳芸蓁
+四年仁班,15,林采樂
+四年仁班,16,張昱臻
+四年仁班,17,張云馨
+四年仁班,18,蔡語喬
+四年仁班,19,洪若珈
+四年仁班,20,官霈沄
+四年仁班,21,侯怡琁
+四年仁班,22,王仲卉
+五年忠班,1,楊仁杰
+五年忠班,2,郭冠廷
+五年忠班,3,陳和逸
+五年忠班,4,吳奕泰
+五年忠班,5,王茂畯
+五年忠班,6,温宇城
+五年忠班,7,林琨捷
+五年忠班,8,傅于軒
+五年忠班,9,陳元麒
+五年忠班,10,馬盈安
+五年忠班,11,呂昀甄
+五年忠班,12,李妍質
+五年忠班,13,林芯羽
+五年忠班,14,沈庭妤
+五年忠班,15,蔡季庭
+五年忠班,16,沈芝儀
+五年忠班,17,馬苹琁
+五年忠班,18,張芯慈
+五年忠班,19,吳苡蓁
+五年孝班,1,呂起杭
+五年孝班,2,侯宇宸
+五年孝班,3,蘇彥宸
+五年孝班,4,李育峰
+五年孝班,5,侯威丞
+五年孝班,7,徐柏榆
+五年孝班,8,賴譽仁
+五年孝班,9,林彥佑
+五年孝班,10,許芯嫙
+五年孝班,11,黃子恩
+五年孝班,12,吳緯琳
+五年孝班,13,黃子宸
+五年孝班,14,蔡楹姍
+五年孝班,15,雷小葆
+五年孝班,16,李辰晞
+五年孝班,17,陳倚帆
+五年孝班,18,陳依姍
+五年仁班,1,王健倫
+五年仁班,2,黃冠棠
+五年仁班,3,錢宣邑
+五年仁班,4,郭向宸
+五年仁班,5,黃冠霖
+五年仁班,6,龔逸凱
+五年仁班,7,蔡少朋
+五年仁班,8,呂東澤
+五年仁班,9,賴俊瑋
+五年仁班,10,呂忻倪
+五年仁班,11,陳宥臻
+五年仁班,12,劉芯沅
+五年仁班,13,蔡云馨
+五年仁班,14,翁若云
+五年仁班,15,陳巧芳
+五年仁班,16,蕭梓喬
+五年仁班,17,呂喬媗
+五年仁班,18,林苡茜
+六年忠班,1,蔡岳庭
+六年忠班,2,黃琚祐
+六年忠班,3,陳柏豪
+六年忠班,4,吳奕震
+六年忠班,5,葉丞祐
+六年忠班,6,陳建綸
+六年忠班,7,黃傳薪
+六年忠班,8,蔡嘉龍
+六年忠班,9,王瑀澤
+六年忠班,10,馬伯勳
+六年忠班,11,陳韋呈
+六年忠班,12,向唄樂
+六年忠班,13,吳昀靜
+六年忠班,14,蔡雨恩
+六年忠班,15,魏綾圻
+六年忠班,16,官宜蓁
+六年忠班,17,鄭竹晽
+六年忠班,18,張芊鈺
+六年忠班,19,黃梓榕
+六年忠班,20,李依宸
+六年忠班,21,王苡恩
+六年忠班,22,蔡宛蓁
+六年忠班,23,張芃緗
+六年孝班,1,陳柏維
+六年孝班,2,林冠廷
+六年孝班,3,雷振宇
+六年孝班,4,蔡承諭
+六年孝班,5,呂威霆
+六年孝班,6,盧彥璋
+六年孝班,7,張誠恩
+六年孝班,8,蘇郁智
+六年孝班,9,官臨恩
+六年孝班,10,何梓伊
+六年孝班,11,馬翊瑞
+六年孝班,12,官采柔
+六年孝班,13,陳韋茹
+六年孝班,14,陳恩嘉
+六年孝班,15,呂忻諭
+六年孝班,16,廖文妤
+六年孝班,17,施忻妤
+六年孝班,18,李采衣
+六年孝班,19,劉宜婷
+六年孝班,20,鐘亭汶
+六年孝班,21,黃沛芯
+六年孝班,22,蔡依叡
+六年孝班,23,王妡伃
+六年仁班,1,楊承諺
+六年仁班,2,李昌霖
+六年仁班,3,王仲宇
+六年仁班,4,張宸瑋
+六年仁班,5,陳宥廷
+六年仁班,6,張恩承
+六年仁班,7,蘇裕荃
+六年仁班,8,侯柏辰
+六年仁班,9,蔡明哲
+六年仁班,10,林士涵
+六年仁班,11,王晨覟
+六年仁班,12,陳妍甯
+六年仁班,13,許芷瑄
+六年仁班,14,許彩芯
+六年仁班,15,張珉瑄
+六年仁班,16,林琬頤
+六年仁班,17,陳毓潔
+六年仁班,18,蔡宜琇
+六年仁班,19,官可馨
+六年仁班,20,蔡佳諼
+六年仁班,21,黃琬琇
+六年仁班,22,蕭敏安
+六年仁班,23,黃珮婷`;
+
+        const students = rawRoster.split('\n').map(l => {
+            const [klass, seat, name] = l.split(',');
+            return { id: klass+seat+name, klass, seat, name };
+        });
+
+        // --- 全域變數 ---
+        let drawnHistory = JSON.parse(localStorage.getItem('drawn_history_final_v12')) || [];
+        let currentWeek = 5; 
+        let cloudScript = "";
+
+        // --- 初始化選單 ---
+        const weekSelect = document.getElementById('week-select');
+        Object.keys(weekDates).forEach(w => {
+            let opt = new Option(`第 ${w} 週 (${weekDates[w]})`, w);
+            if(w == currentWeek) opt.selected = true;
+            weekSelect.add(opt);
+        });
+
+        const gradeSelect = document.getElementById('gradeSelect');
+        const classSelect = document.getElementById('classSelect');
+        ["一年", "二年", "三年", "四年", "五年", "六年"].forEach(g => gradeSelect.add(new Option(g + "級", g)));
+
+        // --- 核心連動函式 ---
+        function updateClassOptions() {
+            const grade = gradeSelect.value;
+            const classesInGrade = [...new Set(students.filter(s => s.klass.startsWith(grade)).map(s => s.klass))];
+            classSelect.innerHTML = "";
+            classSelect.add(new Option("全部班級", "all"));
+            classesInGrade.forEach(c => classSelect.add(new Option(c, c)));
+            updateCounter();
         }
 
+        function updateCounter() {
+            const grade = gradeSelect.value;
+            const klass = classSelect.value;
+            const chipArea = document.getElementById('student-list-chips');
+            chipArea.innerHTML = ""; 
+
+            let pool = students.filter(s => s.klass.startsWith(grade));
+            if (klass !== "all") pool = pool.filter(s => s.klass === klass);
+
+            // 生成名字晶片供快速點選排除
+            pool.forEach(std => {
+                const isDrawn = drawnHistory.includes(std.id);
+                const chip = document.createElement('button');
+                chip.innerText = std.name;
+                chip.className = isDrawn ? "student-chip is-drawn" : "student-chip";
+                chip.onclick = () => toggleExclude(std.id);
+                chipArea.appendChild(chip);
+            });
+
+            const total = pool.length;
+            const drawnCount = drawnHistory.filter(id => pool.some(s => s.id === id)).length;
+            document.getElementById('counter-info').innerText = `選定名單共 ${total} 人，已抽 ${drawnCount} 人，剩餘 ${total - drawnCount} 人`;
+        }
+
+        function toggleExclude(id) {
+            if (drawnHistory.includes(id)) {
+                drawnHistory = drawnHistory.filter(i => i !== id);
+            } else {
+                drawnHistory.push(id);
+            }
+            localStorage.setItem('drawn_history_final_v12', JSON.stringify(drawnHistory));
+            updateCounter();
+        }
+
+        // --- 英語日與劇本邏輯 ---
         async function fetchScriptFromCloud() {
-            const statusTag = document.getElementById('sync-status');
+            const dot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            dot.className = "sync-dot sync-active";
+            statusText.innerText = "同步雲端中...";
             try {
                 const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
-                if (!res.ok) throw new Error();
                 const text = await res.text();
-                
                 const rows = [];
                 let currField = '', inQuotes = false, currRow = [];
                 const safeText = text.trim() + '\n';
-
                 for (let i = 0; i < safeText.length; i++) {
                     let c = safeText[i], n = safeText[i+1];
                     if (c === '"' && inQuotes && n === '"') { currField += '"'; i++; }
@@ -108,7 +568,6 @@
                         if (c === '\r' && n === '\n') i++;
                     } else { currField += c; }
                 }
-
                 const target = rows.find(r => r[0] && r[0].trim() == String(currentWeek));
                 if (target) {
                     let found = "";
@@ -116,20 +575,16 @@
                         let content = target[i] ? target[i].trim() : "";
                         if(content.length > 5) { found = content; break; }
                     }
-                    cloudScript = found || "找到該週，但劇本欄位內容過短或為空。";
-                    statusTag.innerText = "● 連線成功";
-                    statusTag.style.color = "green";
-                } else {
-                    cloudScript = `試算表中找不到第 ${currentWeek} 週的劇本。`;
-                    statusTag.innerText = "● 查無資料";
-                    statusTag.style.color = "orange";
+                    cloudScript = found || "本週尚未輸入劇本。";
+                    statusText.innerText = "同步成功";
+                    dot.style.backgroundColor = "#28a745";
                 }
             } catch (e) {
-                cloudScript = "無法讀取雲端資料。";
-                statusTag.innerText = "● 連線失敗";
-                statusTag.style.color = "red";
+                statusText.innerText = "連線失敗";
+                dot.style.backgroundColor = "#dc3545";
             }
-            if (step === 4) render();
+            dot.className = "sync-dot";
+            renderTable();
         }
 
         function highlightText(text) {
@@ -145,49 +600,122 @@
             return txt.replace(/\n/g, '<br>');
         }
 
-        function render() {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const phrases = weeklyDB[currentWeek] || ["", "", "", ""];
+        function renderTable() {
+            const phrases = weeklyDB[currentWeek];
             const grades = ["三", "四", "五", "六"];
+            let h = '';
+            phrases.forEach((txt, i) => { 
+                const isHoliday = (txt === "—" || txt.includes("全中運"));
+                h += `<tr>
+                        <td class="row-grade">${grades[i]}年級</td>
+                        <td class="row-en">${txt}</td>
+                        <td class="row-speak">
+                            <button class="speak-btn" onclick="speak('${txt.split('\n')[0].replace(/'/g, "\\'")}')" ${isHoliday ? 'style="display:none"' : ''}>🔊 發音</button>
+                        </td>
+                      </tr>`; 
+            });
+            document.getElementById('table-content').innerHTML = h;
+            document.getElementById('script-content').innerHTML = highlightText(cloudScript);
+        }
 
-            if (step === -1) {
-                document.getElementById('page-overview').classList.add('active');
-                let h = '';
-                phrases.forEach((txt, i) => { h += `<tr><td class="row-grade">${grades[i]}年級</td><td class="row-en">${txt}</td></tr>`; });
-                document.getElementById('table-content').innerHTML = h;
-            } else if (step >= 0 && step < 4) {
-                document.getElementById('page-detail').classList.add('active');
-                document.getElementById('det-g').innerText = grades[step] + "年級";
-                document.getElementById('det-en').innerText = phrases[step];
-            } else {
-                document.getElementById('page-script').classList.add('active');
-                document.getElementById('script-content').innerHTML = highlightText(cloudScript);
+        // --- 抽籤與音效邏輯 ---
+        let audioCtx = null;
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playCoin() {
+            initAudio(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.08); 
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+        function playPowerUp() {
+            initAudio(); const freqs = [130.81, 155.56, 196.00, 261.63, 311.13, 392.00, 523.25, 622.25, 783.99];
+            freqs.forEach((f, i) => {
+                const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(f, audioCtx.currentTime + i * 0.07);
+                g.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.07); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.07 + 0.1);
+                osc.connect(g); g.connect(audioCtx.destination); osc.start(audioCtx.currentTime + i * 0.07); osc.stop(audioCtx.currentTime + i * 0.07 + 0.1);
+            });
+        }
+
+        const btnDraw = document.getElementById('btnDraw');
+        const winnerName = document.getElementById('winner-name');
+        const winnerInfo = document.getElementById('winner-info');
+        const sentenceBox = document.getElementById('sentence-box');
+
+        btnDraw.addEventListener('click', () => {
+            const grade = gradeSelect.value;
+            const klass = classSelect.value;
+            let pool = students.filter(s => s.klass.startsWith(grade) && !drawnHistory.includes(s.id));
+            if (klass !== "all") pool = pool.filter(s => s.klass === klass);
+
+            if (pool.length === 0) {
+                if (confirm("這組名單全都抽過囉！要重置紀錄嗎？")) { resetDrawnHistory(); }
+                return;
+            }
+
+            btnDraw.disabled = true;
+            sentenceBox.style.display = 'none';
+            winnerName.classList.remove('celebrate');
+            winnerInfo.innerText = "🔍 搜尋同學中...";
+
+            let counter = 0;
+            const interval = setInterval(() => {
+                const rand = pool[Math.floor(Math.random() * pool.length)];
+                winnerName.innerText = rand.name;
+                winnerName.classList.add('shuffling-text');
+                if (counter % 3 === 0) playCoin();
+                counter++;
+                if (counter >= 25) {
+                    clearInterval(interval);
+                    winnerName.classList.remove('shuffling-text');
+                    const final = pool[Math.floor(Math.random() * pool.length)];
+                    winnerInfo.innerText = `${final.klass} | 座號 ${final.seat}`;
+                    winnerName.innerText = final.name;
+                    winnerName.classList.add('celebrate');
+                    
+                    // 自動排除
+                    drawnHistory.push(final.id);
+                    localStorage.setItem('drawn_history_final_v12', JSON.stringify(drawnHistory));
+                    updateCounter();
+                    
+                    // 顯示句子
+                    const gKey = grade[0];
+                    const gMap = {"三":0, "四":1, "五":2, "六":3};
+                    if (gMap.hasOwnProperty(gKey)) {
+                        const fullText = weeklyDB[currentWeek][gMap[gKey]];
+                        if (fullText && fullText !== "—") {
+                            const [en, ch] = fullText.split('\n');
+                            document.getElementById('sentence-en').innerText = en;
+                            document.getElementById('sentence-ch').innerText = ch || "";
+                            sentenceBox.style.display = 'block';
+                        }
+                    }
+                    playPowerUp();
+                    btnDraw.disabled = false;
+                }
+            }, 80);
+        });
+
+        function resetDrawnHistory() {
+            if (confirm(`確定要清除所有抽籤紀錄，讓所有人重新回到抽籤名單嗎？`)) {
+                drawnHistory = [];
+                localStorage.setItem('drawn_history_final_v12', JSON.stringify(drawnHistory));
+                updateCounter();
+                winnerName.innerText = "？";
+                winnerInfo.innerText = "Ready?";
+                sentenceBox.style.display = 'none';
             }
         }
 
-        function next() { step = (step < 4) ? step + 1 : -1; render(); }
-        function prev() { step = (step > -1) ? step - 1 : 4; render(); }
-        
-        function changeWeek() { 
-            currentWeek = parseInt(select.value); 
-            step = -1; 
-            cloudScript = "讀取中...";
-            render(); 
-            fetchScriptFromCloud(); 
-        }
-
-        function speak() {
+        function changeWeek() { currentWeek = parseInt(weekSelect.value); fetchScriptFromCloud(); }
+        function speak(text) {
             window.speechSynthesis.cancel();
-            const textToSpeak = document.getElementById('det-en').innerText.split('\n')[0];
-            const m = new SpeechSynthesisUtterance(textToSpeak);
+            const m = new SpeechSynthesisUtterance(text);
             m.lang = 'en-US'; m.rate = 0.8; window.speechSynthesis.speak(m);
         }
 
-        document.getElementById('main-container').onclick = (e) => {
-            if(!document.getElementById('controls-bar').contains(e.target)) next();
-        };
-
-        render(); 
+        updateClassOptions();
         fetchScriptFromCloud();
     </script>
 </body>
