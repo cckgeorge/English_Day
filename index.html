@@ -39,7 +39,7 @@
 
         <div id="page-script" class="page">
             <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-orange); font-size:1.4rem; display: flex; justify-content: space-between;">
-                <span>🎭 表演劇本 (雲端自動同步):</span>
+                <span>🎭 表演劇本 (雲端同步成功):</span>
                 <span id="sync-status">● 讀取中...</span>
             </div>
             <div class="script-area" id="script-content">劇本載入中...</div>
@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        // 使用您提供的公開發佈網址
+        // 使用您提供的公開下載連結
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQzyQyNU7yFhOkWzlCWj_SlltAD64isYM3fmsq4D3PaPTymq2Dgu7iJ6rl8Lvy8Z8oBX6rhdrjEV8Mk/pub?output=csv`;
 
         const weeklyDB = {
@@ -90,7 +90,6 @@
         async function fetchScriptFromCloud() {
             const statusTag = document.getElementById('sync-status');
             try {
-                // 使用公開發佈網址獲取資料
                 const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
                 if (!res.ok) throw new Error();
                 const text = await res.text();
@@ -110,25 +109,23 @@
                     } else { currField += c; }
                 }
 
-                // 搜尋目前的週次
                 const target = rows.find(r => r[0] && r[0].trim() == String(currentWeek));
                 if (target) {
                     let found = "";
-                    // 從後往前找長內容當劇本
                     for(let i = target.length - 1; i >= 1; i--) {
                         let content = target[i] ? target[i].trim() : "";
                         if(content.length > 5) { found = content; break; }
                     }
-                    cloudScript = found || "找到該週，但劇本內容太短或為空。";
+                    cloudScript = found || "找到該週，但劇本欄位內容過短或為空。";
                     statusTag.innerText = "● 連線成功";
                     statusTag.style.color = "green";
                 } else {
-                    cloudScript = `試算表中找不到第 ${currentWeek} 週。`;
+                    cloudScript = `試算表中找不到第 ${currentWeek} 週的劇本。`;
                     statusTag.innerText = "● 查無資料";
                     statusTag.style.color = "orange";
                 }
             } catch (e) {
-                cloudScript = "連線失敗。請確認試算表已發佈。";
+                cloudScript = "無法讀取雲端資料。";
                 statusTag.innerText = "● 連線失敗";
                 statusTag.style.color = "red";
             }
