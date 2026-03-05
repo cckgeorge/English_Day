@@ -39,7 +39,7 @@
 
         <div id="page-script" class="page">
             <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-orange); font-size:1.4rem; display: flex; justify-content: space-between;">
-                <span>🎭 表演劇本 (個人雲端同步):</span>
+                <span>🎭 表演劇本 (雲端自動同步):</span>
                 <span id="sync-status">● 讀取中...</span>
             </div>
             <div class="script-area" id="script-content">劇本載入中...</div>
@@ -53,9 +53,8 @@
     </div>
 
     <script>
-        // 已更新為您的個人帳號試算表 ID
-        const SHEET_ID = '1T6Yqf7_UxiVwBe9g8DQhaYMIAN6z3IHWJTvTom5S924';
-        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
+        // 使用您提供的公開發佈網址
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQzyQyNU7yFhOkWzlCWj_SlltAD64isYM3fmsq4D3PaPTymq2Dgu7iJ6rl8Lvy8Z8oBX6rhdrjEV8Mk/pub?output=csv`;
 
         const weeklyDB = {
             4: ["Good job!\n做得好！", "Welcome back to school.\n歡迎回到學校。", "Take your time.\n慢慢來，不用急。", "What did you hear?\n你聽到什麼了？"],
@@ -91,7 +90,7 @@
         async function fetchScriptFromCloud() {
             const statusTag = document.getElementById('sync-status');
             try {
-                // 強制加上 nocache 防止舊資料快取
+                // 使用公開發佈網址獲取資料
                 const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
                 if (!res.ok) throw new Error();
                 const text = await res.text();
@@ -111,25 +110,25 @@
                     } else { currField += c; }
                 }
 
-                // 尋找對應週次 (第一欄)
+                // 搜尋目前的週次
                 const target = rows.find(r => r[0] && r[0].trim() == String(currentWeek));
                 if (target) {
                     let found = "";
-                    // 從整列的最後一個儲存格往回找，找到長度超過 5 的當作劇本
+                    // 從後往前找長內容當劇本
                     for(let i = target.length - 1; i >= 1; i--) {
                         let content = target[i] ? target[i].trim() : "";
                         if(content.length > 5) { found = content; break; }
                     }
-                    cloudScript = found || "劇本欄位目前是空的。";
+                    cloudScript = found || "找到該週，但劇本內容太短或為空。";
                     statusTag.innerText = "● 連線成功";
                     statusTag.style.color = "green";
                 } else {
-                    cloudScript = "試算表中找不到第 " + currentWeek + " 週。";
+                    cloudScript = `試算表中找不到第 ${currentWeek} 週。`;
                     statusTag.innerText = "● 查無資料";
                     statusTag.style.color = "orange";
                 }
             } catch (e) {
-                cloudScript = "連線失敗。請確認試算表已『發佈到網路』並選擇『CSV』。";
+                cloudScript = "連線失敗。請確認試算表已發佈。";
                 statusTag.innerText = "● 連線失敗";
                 statusTag.style.color = "red";
             }
