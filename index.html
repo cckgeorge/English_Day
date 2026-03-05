@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>嘉義太保國小 - 英語日宣導系統</title>
+    <style>
+        :root { --bg-color: #fdfdfd; --primary-color: #3d405b; --accent-yellow: #f2cc8f; --accent-green: #81b29a; --accent-orange: #e07a5f; }
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .container { width: 95%; max-width: 1350px; height: 88vh; background: white; border-radius: 30px; border: 8px solid #9d8189; padding: 30px; display: flex; flex-direction: column; position: relative; box-sizing: border-box; box-shadow: 15px 15px 0px rgba(0,0,0,0.05); }
+        .page { display: none; height: 100%; flex-direction: column; justify-content: center; }
+        .active { display: flex; }
+        .overview-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; }
+        .row-grade { background: var(--accent-yellow); width: 18%; text-align: center; font-size: 2rem; font-weight: bold; border-radius: 20px 0 0 20px; padding: 15px; }
+        .row-en { background: #fff; border: 4px solid var(--accent-yellow); border-left: none; width: 82%; font-size: 1.8rem; font-weight: bold; padding-left: 25px; border-radius: 0 20px 20px 0; line-height: 1.4; white-space: pre-wrap; }
+        .detail-grade { background: var(--accent-yellow); display: inline-block; padding: 10px 80px; border-radius: 60px; font-size: 3.5rem; font-weight: bold; margin: 0 auto 20px; text-align: center; }
+        .detail-en { font-size: 4.5rem; font-weight: 900; text-align: center; line-height: 1.2; margin-bottom: 10px; padding: 0 20px; color: #111; white-space: pre-wrap; }
+        .script-area { background: #fff; border: 5px dashed var(--accent-green); border-radius: 20px; padding: 30px; overflow-y: auto; height: 55vh; font-size: 2.3rem; line-height: 1.6; white-space: pre-wrap; text-align: left; }
+        .highlight { color: #e63946; font-weight: 900; text-decoration: underline; background: rgba(230,57,70,0.1); }
+        .controls { position: absolute; bottom: 15px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 15px; }
+        select { font-size: 1.5rem; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--primary-color); }
+        button.nav-btn { padding: 12px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 12px; border: none; background: var(--primary-color); color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        <div id="page-overview" class="page active">
+            <h1 style="text-align: center; font-size: 2.5rem; margin: 0;">每週英語一句</h1>
+            <table class="overview-table" id="table-content"></table>
+        </div>
+
+        <div id="page-detail" class="page">
+            <div class="detail-grade" id="det-g"></div>
+            <div class="detail-en" id="det-en"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button style="padding:15px 40px; font-size:1.8rem; cursor:pointer; background:var(--accent-green); color:white; border:none; border-radius:50px;" onclick="event.stopPropagation(); speak()">🔊 播放發音</button>
+            </div>
+        </div>
+
+        <div id="page-script" class="page">
+            <div style="font-weight:bold; margin-bottom:10px; color:var(--accent-orange); font-size:1.4rem; display: flex; justify-content: space-between;">
+                <span>🎭 表演劇本 (雲端同步):</span>
+                <span id="sync-status">● 讀取中...</span>
+            </div>
+            <div class="script-area" id="script-content">劇本載入中...</div>
+        </div>
+
+        <div class="controls" id="controls-bar">
+            <button class="nav-btn" onclick="prev()">◀ 上一頁</button>
+            <select id="week-select" onchange="changeWeek()"></select>
+            <button class="nav-btn" onclick="next()">下一頁 ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // 修正重點：使用 /pub 格式來解決 CORS 權限問題
+        const SHEET_ID = '1tiDLiTQA2lof2awzdHBUa_UoYBX9H-UZEyqswcxb7Yk';
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
+
+        const weeklyDB = {
+            4: ["Good job!\n做得好！", "Welcome back to school.\n歡迎回到學校。", "Take your time.\n慢慢來，不用急。", "What did you hear?\n你聽到什麼了？"],
+            5: ["Hands up, please.\n請舉手。", "Happy to see you again.\n很開心又見面了。", "You can say that again.\n你說得沒錯。", "Which one do you like?\n你喜歡哪一個？"],
+            6: ["Hands down.\n手放下。", "Time for class.\n上課囉！", "May I help you?\n我可以幫你嗎？", "Who can answer me?\n誰能回答？"],
+            7: ["Eyes on me.\n眼睛看我。", "Here we go.\n我們開始吧！", "That sounds fun!\n聽起來很有趣！", "Take your time.\n慢慢來，不用急。"],
+            8: ["Take a seat.\n請坐好。", "Here you are.\n這個給你。", "How was your weekend?\n你的週末過得如何？", "Let's go out for a walk.\n讓我們出去走走。"],
+            9: ["Try again.\n再試一次。", "Take it easy.\n放輕鬆。", "Please say it again.\n請再說一次。", "Please keep the table clean.\n請保持桌面乾淨。"],
+            10: ["Very good!\n非常好！", "Good luck.\n祝好運。", "I'm proud of you!\n我為你感到驕傲！", "You are very clever!\n你真聰明！"],
+            11: ["Are you ready?\n準備好了嗎？", "Hold on a second.\n等一下。", "Keep up the good work!\n繼續保持好表現！", "May I use your pen?\n我可以借用一下你的筆嗎？"],
+            12: ["—", "—", "—", "全中運停課"],
+            13: ["Follow me.\n跟著我。", "Take your time.\n慢慢來。", "You blew it!\n你把事情搞砸了！", "What’s your plan for the weekend?\n你週末有什麼計畫？"],
+            14: ["One more time.\n再一次。", "See you next week.\n下星期見。", "What a deal!\n好便宜！", "Where is the restroom?\n洗手間在哪裡？"],
+            15: ["It's your turn.\n輪到你了。", "Are you sure?\n你確定嗎？", "I have no idea.\n一門頭緒都沒有。", "Let's call it a day.\n今天就到此為止吧。"],
+            16: ["I'm hungry.\n我餓了。", "What's for lunch?\n午餐吃什麼？", "I'm looking forward to it.\n我很期待。", "Never mind.\n沒關係 / 別介意。"],
+            17: ["Let's count.\n讓我們來數一數。", "Be careful.\n小心。", "What happened?\n發生什麼事了？", "Keep it up.\n繼續努力。"],
+            18: ["Great job!\n做得好！", "Excuse me.\n請問一下 / 不好意思。", "Don't give up.\n不要放棄。", "Believe in yourself.\n相信你自己。"],
+            19: ["Happy Summer!\n暑假快樂！", "See you later.\n待會見。", "Have a nice trip.\n旅途愉快。", "Happy Graduation!\n畢業快樂！"],
+            20: ["See you next semester.\n下學期見。", "See you next semester.", "See you next semester.", "See you next semester."]
+        };
+
+        let currentWeek = 5; 
+        let step = -1;
+        let cloudScript = "讀取中...";
+
+        const select = document.getElementById('week-select');
+        for(let w=4; w<=20; w++) {
+            let opt = document.createElement('option'); opt.value = w; opt.text = `第 ${w} 週`;
+            if(w==currentWeek) opt.selected = true;
+            select.appendChild(opt);
+        }
+
+        async function fetchScriptFromCloud() {
+            const statusTag = document.getElementById('sync-status');
+            try {
+                // 加入快取消除機制
+                const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
+                if (!res.ok) throw new Error("Fetch failed");
+                const text = await res.text();
+                
+                const rows = [];
+                let currField = '', inQuotes = false, currRow = [];
+                const safeText = text.trim() + '\n';
+
+                for (let i = 0; i < safeText.length; i++) {
+                    let c = safeText[i], n = safeText[i+1];
+                    if (c === '"' && inQuotes && n === '"') { currField += '"'; i++; }
+                    else if (c === '"') { inQuotes = !inQuotes; }
+                    else if (c === ',' && !inQuotes) { currRow.push(currField); currField = ''; }
+                    else if ((c === '\n' || c === '\r') && !inQuotes) {
+                        currRow.push(currField); rows.push(currRow); currRow = []; currField = '';
+                        if (c === '\r' && n === '\n') i++;
+                    } else { currField += c; }
+                }
+
+                const target = rows.find(r => r[0] && r[0].trim() == String(currentWeek));
+                if (target) {
+                    let found = "";
+                    // 從後往前搜尋第一個長內容當劇本
+                    for(let i = target.length - 1; i >= 1; i--) {
+                        let content = target[i] ? target[i].trim() : "";
+                        if(content.length > 5) { found = content; break; }
+                    }
+                    cloudScript = found || "找到該週，但劇本欄位是空的。";
+                    statusTag.innerText = "● 連線成功";
+                    statusTag.style.color = "green";
+                } else {
+                    cloudScript = "試算表中找不到第 " + currentWeek + " 週。";
+                    statusTag.innerText = "● 查無資料";
+                    statusTag.style.color = "orange";
+                }
+            } catch (e) {
+                console.error("CORS or Network Error:", e);
+                cloudScript = "讀取失敗。請確認試算表已『發佈到網路』並選擇『CSV』格式。";
+                statusTag.innerText = "● 連線失敗";
+                statusTag.style.color = "red";
+            }
+            if (step === 4) render();
+        }
+
+        function highlightText(text) {
+            let txt = text;
+            const phrases = weeklyDB[currentWeek] || [];
+            phrases.forEach(p => {
+                const engOnly = p.split('\n')[0].replace(/[.!?,]$/, '').trim();
+                if(engOnly.length < 3) return;
+                const safeEng = engOnly.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const reg = new RegExp(`(${safeEng}[^\\s\\n\\.]*)`, 'gi');
+                txt = txt.replace(reg, `<span class="highlight">$1</span>`);
+            });
+            return txt.replace(/\n/g, '<br>');
+        }
+
+        function render() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const phrases = weeklyDB[currentWeek] || ["", "", "", ""];
+            const grades = ["三", "四", "五", "六"];
+
+            if (step === -1) {
+                document.getElementById('page-overview').classList.add('active');
+                let h = '';
+                phrases.forEach((txt, i) => { h += `<tr><td class="row-grade">${grades[i]}年級</td><td class="row-en">${txt}</td></tr>`; });
+                document.getElementById('table-content').innerHTML = h;
+            } else if (step >= 0 && step < 4) {
+                document.getElementById('page-detail').classList.add('active');
+                document.getElementById('det-g').innerText = grades[step] + "年級";
+                document.getElementById('det-en').innerText = phrases[step];
+            } else {
+                document.getElementById('page-script').classList.add('active');
+                document.getElementById('script-content').innerHTML = highlightText(cloudScript);
+            }
+        }
+
+        function next() { step = (step < 4) ? step + 1 : -1; render(); }
+        function prev() { step = (step > -1) ? step - 1 : 4; render(); }
+        
+        function changeWeek() { 
+            currentWeek = parseInt(select.value); 
+            step = -1; 
+            cloudScript = "讀取中...";
+            render(); 
+            fetchScriptFromCloud(); 
+        }
+
+        function speak() {
+            window.speechSynthesis.cancel();
+            const textToSpeak = document.getElementById('det-en').innerText.split('\n')[0];
+            const m = new SpeechSynthesisUtterance(textToSpeak);
+            m.lang = 'en-US'; m.rate = 0.8; window.speechSynthesis.speak(m);
+        }
+
+        document.getElementById('main-container').onclick = (e) => {
+            if(!document.getElementById('controls-bar').contains(e.target)) next();
+        };
+
+        render(); 
+        fetchScriptFromCloud();
+    </script>
+</body>
+</html>
